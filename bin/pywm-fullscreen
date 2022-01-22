@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+SOURCE=${BASH_SOURCE[0]}
+while [ -h "$SOURCE" ]; do
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE
+done
+DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+
+
+LOGDIR=$HOME
+if [ "$LOGDIR" = "/" ]; then 
+    echo "Switching to tmp" 
+    LOGDIR="/tmp"
+else
+    LOGDIR="$LOGDIR/.cache"
+fi;
+
+mkdir -p $LOGDIR
+pushd $LOGDIR
+if [ -e pywm-fullscreen_log_bu1 ]
+    then cp pywm-fullscreen_log_bu1 pywm-fullscreen_log_bu2
+fi
+if [ -e pywm-fullscreen_log ]
+    then cp pywm-fullscreen_log pywm-fullscreen_log_bu1
+fi
+popd
+
+echo "pywm-fullscreen - script dir is $DIR, log dir is $LOGDIR, arguments are $@"
+exec $DIR/.pywm-fullscreen "$@" > $LOGDIR/pywm-fullscreen_log 2>&1

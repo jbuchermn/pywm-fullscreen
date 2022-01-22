@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+import sys
+import argparse
+
+from pywm_fullscreen import run
+
+print("newm python - args are %s" % str(sys.argv), flush=True)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-e", "--execute", type=str, default="alacritty")
+
+args = parser.parse_args()
+
+print(args)
+
+run(args.execute)

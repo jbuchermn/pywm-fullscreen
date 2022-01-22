@@ -1,0 +1,6 @@
+newm.egg-info
+**/__pycache__
+.mypy_cache
+newm/resources/*.mp4
+build/
+result
