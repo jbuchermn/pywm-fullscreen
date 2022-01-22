@@ -11,7 +11,21 @@ from pywm import (
 
 from .view import View
 
-conf_pywm: dict[str, Any] = {}
+conf_pywm: dict[str, Any] = {
+    'xkb_model': "macintosh",
+    'xkb_layout': "de,de",
+    'xkb_options': "caps:escape",
+
+    'xcursor_theme': 'Adwaita',
+    'xcursor_size': 24,
+
+    'encourage_csd': False,
+    'enable_xwayland': False,
+
+    'natural_scroll': True,
+
+    'texture_shaders': 'noeffect'
+}
 conf_outputs: list[dict[str, Any]] = []
 
 logger = logging.getLogger(__name__)
@@ -26,6 +40,7 @@ class Compositor(PyWM[View]):
 
     def main(self) -> None:
         logger.debug("Compositor main...")
+        self.update_cursor()
         os.system("%s &" % self._execute)
 
     def destroy_view(self, view: View) -> None:
