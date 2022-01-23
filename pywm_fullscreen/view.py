@@ -19,7 +19,10 @@ class View(PyWMView[Compositor]):
         logger.debug("New view - %s" % self.up_state)
 
     def init(self) -> PyWMViewDownstreamState:
-        res = PyWMViewDownstreamState(self._handle, (self.wm.layout[0].pos[0], self.wm.layout[0].pos[1], self.wm.layout[0].width, self.wm.layout[0].height), accepts_input=True)
+        if self.up_state is None:
+            return PyWMViewDownstreamState()
+
+        res = PyWMViewDownstreamState(self._handle, (self.wm.layout[0].pos[0] - self.up_state.offset[0], self.wm.layout[0].pos[1] - self.up_state.offset[1], self.wm.layout[0].width, self.wm.layout[0].height), accepts_input=True)
         res.size = self.wm.layout[0].width, self.wm.layout[0].height
 
         self.focus()
