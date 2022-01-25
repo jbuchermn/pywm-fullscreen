@@ -1,12 +1,24 @@
 from __future__ import annotations
 
 import logging
+import time
+import sys
+
+try:
+    import yappi  # type: ignore
+    YAPPI = True
+except:
+    YAPPI = False
 
 from .compositor import Compositor
+from .args import args
 
 logger = logging.getLogger(__name__)
 
-def run(execute: str) -> None:
+def run() -> None:
+    print("pywm-fullscreen (python) - args are %s" % str(sys.argv), flush=True)
+
+
     handler = logging.StreamHandler()
     formatter = logging.Formatter('[%(levelname)s] %(filename)s:%(lineno)s %(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -18,11 +30,25 @@ def run(execute: str) -> None:
         log.setLevel(logging.DEBUG)
         log.addHandler(handler)
 
-    wm = Compositor(execute=execute)
+    wm = Compositor()
 
     try:
+        if YAPPI and args.profile:
+            yappi.start()
         wm.run()
     except Exception:
         logger.exception("Unexpected")
     finally:
         wm.terminate()
+
+        if YAPPI and args.profile:
+            time.sleep(2.)
+            yappi.stop()
+            for thread in yappi.get_thread_stats():
+                print("----------- THREAD (%s) (%d) ----------------" % (thread.name, thread.id))
+                for s in yappi.get_func_stats(ctx_id=thread.id):
+                    where = "%s.%s:%d" % (s.module, s.name, s.lineno)
+                    if len(where) > 100:
+                        where = where[-100:]
+
+                    print("%0100s %5d * %.10f = %.10f (%.10f)" % (where, s.ncall, s.tavg, s.ttot, s.tsub))

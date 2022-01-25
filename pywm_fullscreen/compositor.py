@@ -3,6 +3,7 @@ from typing import Any
 
 import os
 import logging
+import time
 
 from pywm import (
     PyWM,
@@ -10,20 +11,20 @@ from pywm import (
 )
 
 from .view import View
+from .args import args
 
 conf_pywm: dict[str, Any] = {
-    'xkb_model': "macintosh",
-    'xkb_layout': "de,de",
-    'xkb_options': "caps:escape",
+    'xkb_model': args.keyboard_model,
+    'xkb_layout': args.keyboard_layout,
+    'xkb_options': args.keyboard_options,
 
-    'xcursor_theme': 'Adwaita',
-    'xcursor_size': 24,
+    'xcursor_theme': args.xcursor_theme,
+    'xcursor_size': args.xcursor_size,
+
+    'natural_scroll': not args.no_natural_scroll,
 
     'encourage_csd': False,
     'enable_xwayland': False,
-
-    'natural_scroll': True,
-
     'texture_shaders': 'noeffect'
 }
 conf_outputs: list[dict[str, Any]] = []
@@ -31,9 +32,8 @@ conf_outputs: list[dict[str, Any]] = []
 logger = logging.getLogger(__name__)
 
 class Compositor(PyWM[View]):
-    def __init__(self, execute: str) -> None:
+    def __init__(self) -> None:
         PyWM.__init__(self, View, **conf_pywm, outputs=conf_outputs, debug=True)
-        self._execute = execute
 
     def process(self) -> PyWMDownstreamState:
         return PyWMDownstreamState()
@@ -41,7 +41,12 @@ class Compositor(PyWM[View]):
     def main(self) -> None:
         logger.debug("Compositor main...")
         self.update_cursor()
-        os.system("%s &" % self._execute)
+        os.system("%s &" % args.execute)
+
+        time.sleep(2.)
+
+        if len(self._views) == 0:
+            self.terminate()
 
     def destroy_view(self, view: View) -> None:
         logger.info("Destroying view %s", view)
