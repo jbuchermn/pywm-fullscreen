@@ -46,9 +46,12 @@ def run() -> None:
             yappi.stop()
             for thread in yappi.get_thread_stats():
                 print("----------- THREAD (%s) (%d) ----------------" % (thread.name, thread.id))
-                for s in yappi.get_func_stats(ctx_id=thread.id):
+                stats = yappi.get_func_stats(ctx_id=thread.id)
+                for s in stats:
                     where = "%s.%s:%d" % (s.module, s.name, s.lineno)
                     if len(where) > 100:
                         where = where[-100:]
 
                     print("%0100s %5d * %.10f = %.10f (%.10f)" % (where, s.ncall, s.tavg, s.ttot, s.tsub))
+
+                stats.save("/tmp/yappistats_%d" % thread.id, type="pstat")
